@@ -228,9 +228,9 @@
     document.querySelector('#my-input').value;
     ```
 
-  + Get index of e.currentTarget between `.radio`
+  + 获取 e.currentTarget 在 `.radio` 中的数组索引
 
-    ```js
+    ```js
     // jQuery
     $(e.currentTarget).index('.radio');
 
@@ -260,6 +260,50 @@
 
     // Native
     iframe.contentDocument.querySelectorAll('.css');
+    ```
+
+- [1.10](#1.10) <a name='1.10'></a> 获取 body
+
+  ```js
+  // jQuery
+  $('body');
+
+  // Native
+  document.body;
+  ```
+
+- [1.11](#1.11) <a name='1.11'></a> 获取或设置属性
+
+  + 获取属性
+
+    ```js
+    // jQuery
+    $el.attr('foo');
+
+    // Native
+    el.getAttribute('foo');
+    ```
+  + 设置属性
+
+    ```js
+    // jQuery, note that this works in memory without change the DOM
+    $el.attr('foo', 'bar');
+
+    // Native
+    el.setAttribute('foo', 'bar');
+    ```
+
+  + 获取 `data-` 属性
+
+    ```js
+    // jQuery
+    $el.data('foo');
+
+    // Native (use `getAttribute`)
+    el.getAttribute('data-foo');
+
+    // Native (use `dataset` if only need to support IE 11+)
+    el.dataset['foo'];
     ```
 
 **[⬆ 回到顶部](#目录)**
@@ -428,6 +472,8 @@
 
 - [2.4](#2.4) <a name='2.4'></a> Scroll Top
 
+  获取元素滚动条垂直位置。
+
   ```js
   // jQuery
   $(window).scrollTop();
@@ -547,11 +593,116 @@
   target.parentNode.insertBefore(newEl, target.nextSibling);
   ```
 
+- [3.8](#3.8) <a name='3.8'></a> is
+
+  如果匹配查询选择器则 `true`
+
+  ```js
+  // jQuery - Notice `is` also work with `function` or `elements` which is not concerned here
+  $el.is(selector);
+
+  // Native
+  el.matches(selector);
+  ```
+- [3.9](#3.9) <a name='3.9'></a> clone
+
+  创建元素的深度拷贝
+
+  ```js
+  // jQuery
+  $el.clone();
+
+  // Native
+  el.cloneNode();
+
+  // For Deep clone , set param as `true`
+  ```
+
+- [3.10](#3.10) <a name='3.10'></a> empty
+
+  移除所有子节点
+
+  ```js
+  // jQuery
+  $el.empty();
+
+  // Native
+  el.innerHTML = '';
+  ```
+
+- [3.11](#3.11) <a name='3.11'></a> wrap
+
+  使用 HTML 结构包装每个元素
+
+  ```js
+  // jQuery
+  $('.inner').wrap('<div class="wrapper"></div>');
+
+  // Native
+  Array.prototype.forEach.call(document.querySelectorAll('.inner'), (el) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'wrapper';
+    el.parentNode.insertBefore(wrapper, el);
+    el.parentNode.removeChild(el);
+    wrapper.appendChild(el);
+  });
+  ```
+
+- [3.12](#3.12) <a name='3.12'></a> unwrap
+
+  从 DOM 中移除匹配元素的父集
+
+  ```js
+  // jQuery
+  $('.inner').unwrap();
+
+  // Native
+  Array.prototype.forEach.call(document.querySelectorAll('.inner'), (el) => {
+    Array.prototype.forEach.call(el.childNodes, (child) => {
+      el.parentNode.insertBefore(child, el);
+    });
+    el.parentNode.removeChild(el);
+  });
+  ```
+
+- [3.13](#3.13) <a name='3.13'></a> replaceWith
+
+  使用提供的新内容替换匹配元素的内容
+
+  ```js
+  // jQuery
+  $('.inner').replaceWith('<div class="outer"></div>');
+
+  // Native
+  Array.prototype.forEach.call(document.querySelectorAll('.inner'), (el) => {
+    const outer = document.createElement('div');
+    outer.className = 'outer';
+    el.parentNode.insertBefore(outer, el);
+    el.parentNode.removeChild(el);
+  });
+  ```
+
 **[⬆ 回到顶部](#目录)**
 
 ## Ajax
 
 用 [fetch](https://github.com/camsong/fetch-ie8) 和 [fetch-jsonp](https://github.com/camsong/fetch-jsonp) 替代
+
+[Fetch API](https://fetch.spec.whatwg.org/) 是用于替换 XMLHttpRequest 处理 ajax 的新标准，Chrome 和 Firefox 均支持，旧浏览器可以使用 polyfills 提供支持。
+
+IE9+ 请使用 [github/fetch](http://github.com/github/fetch)，IE8+ 请使用 [fetch-ie8](https://github.com/camsong/fetch-ie8/)，JSONP 请使用 [fetch-jsonp](https://github.com/camsong/fetch-jsonp)。
+
+- [4.1](#4.1) <a name='4.1'></a> 从服务器读取数据并替换匹配元素的内容。
+
+  ```js
+  // jQuery
+  $(selector).load(url, completeCallback)
+
+  // Native
+  fetch(url).then(data => data.text()).then(data => {
+    document.querySelector(selector).innerHTML = data
+  }).then(completeCallback)
+  ```
 
 **[⬆ 回到顶部](#目录)**
 
@@ -600,7 +751,13 @@
 
 ## Utilities
 
-- [6.1](#6.1) <a name='6.1'></a> isArray
+大部分实用工具都能在 native API 中找到. 其他高级功能可以选用专注于该领域的稳定性和性能都更好的库来代替，推荐 [lodash](https://lodash.com)。
+
+- [6.1](#6.1) <a name='6.1'></a> 基本工具
+
+  + isArray
+
+  检测参数是不是数组。
 
   ```js
   // jQuery
@@ -610,19 +767,111 @@
   Array.isArray(range);
   ```
 
-- [6.2](#6.2) <a name='6.2'></a> Trim
+  + isWindow
+
+  检测参数是不是 window。
 
   ```js
   // jQuery
-  $.trim(string);
+  $.isWindow(obj);
 
   // Native
-  string.trim();
+  function isWindow(obj) {
+    return obj !== null && obj !== undefined && obj === obj.window;
+  }
   ```
 
-- [6.3](#6.3) <a name='6.3'></a> Object Assign
+  + inArray
 
-  继承，使用 object.assign polyfill https://github.com/ljharb/object.assign
+  在数组中搜索指定值并返回索引 (找不到则返回 -1)。
+
+  ```js
+  // jQuery
+  $.inArray(item, array);
+
+  // Native
+  array.indexOf(item) > -1;
+
+  // ES6-way
+  array.includes(item);
+  ```
+
+  + isNumeric
+
+  检测传入的参数是不是数字。
+  Use `typeof` to decide the type or the `type` example for better accuracy.
+
+  ```js
+  // jQuery
+  $.isNumeric(item);
+
+  // Native
+  function isNumeric(value) {
+    var type = typeof value;
+
+    return (type === 'number' || type === 'string') && !Number.isNaN(value - Number.parseFloat(value));
+  }
+  ```
+
+  + isFunction
+
+  检测传入的参数是不是 JavaScript 函数对象。
+
+  ```js
+  // jQuery
+  $.isFunction(item);
+
+  // Native
+  function isFunction(item) {
+    if (typeof item === 'function') {
+      return true;
+    }
+    var type = Object.prototype.toString(item);
+    return type === '[object Function]' || type === '[object GeneratorFunction]';
+  }
+  ```
+
+  + isEmptyObject
+
+  检测对象是否为空 (包括不可枚举属性).
+
+  ```js
+  // jQuery
+  $.isEmptyObject(obj);
+
+  // Native
+  function isEmptyObject(obj) {
+    return Object.keys(obj).length === 0;
+  }
+  ```
+
+  + isPlainObject
+
+  检测是不是扁平对象 (使用 “{}” 或 “new Object” 创建).
+
+  ```js
+  // jQuery
+  $.isPlainObject(obj);
+
+  // Native
+  function isPlainObject(obj) {
+    if (typeof (obj) !== 'object' || obj.nodeType || obj !== null && obj !== undefined && obj === obj.window) {
+      return false;
+    }
+
+    if (obj.constructor &&
+        !Object.prototype.hasOwnProperty.call(obj.constructor.prototype, 'isPrototypeOf')) {
+      return false;
+    }
+
+    return true;
+  }
+  ```
+
+  + extend
+
+  合并多个对象的内容到第一个对象。
+  object.assign 是 ES6 API，也可以使用 [polyfill](https://github.com/ljharb/object.assign)。
 
   ```js
   // jQuery
@@ -632,7 +881,134 @@
   Object.assign({}, defaultOpts, opts);
   ```
 
-- [6.4](#6.4) <a name='6.4'></a> Contains
+  + trim
+
+  移除字符串头尾空白。
+
+  ```js
+  // jQuery
+  $.trim(string);
+
+  // Native
+  string.trim();
+  ```
+
+  + map
+
+  将数组或对象转化为包含新内容的数组。
+
+  ```js
+  // jQuery
+  $.map(array, (value, index) => {
+  });
+
+  // Native
+  array.map((value, index) => {
+  });
+  ```
+
+  + each
+
+  轮询函数，可用于平滑的轮询对象和数组。
+
+  ```js
+  // jQuery
+  $.each(array, (index, value) => {
+  });
+
+  // Native
+  array.forEach((value, index) => {
+  });
+  ```
+
+  + grep
+
+  找到数组中符合过滤函数的元素。
+
+  ```js
+  // jQuery
+  $.grep(array, (value, index) => {
+  });
+
+  // Native
+  array.filter((value, index) => {
+  });
+  ```
+
+  + type
+
+  检测对象的 JavaScript [Class] 内部类型。
+
+  ```js
+  // jQuery
+  $.type(obj);
+
+  // Native
+  function type(item) {
+    const reTypeOf = /(?:^\[object\s(.*?)\]$)/;
+    return Object.prototype.toString.call(item)
+      .replace(reTypeOf, '$1')
+      .toLowerCase();
+  }
+  ```
+
+  + merge
+
+  合并第二个数组内容到第一个数组。
+
+  ```js
+  // jQuery
+  $.merge(array1, array2);
+
+  // Native
+  // But concat function doesn't remove duplicate items.
+  function merge(...args) {
+    return [].concat(...args)
+  }
+  ```
+
+  + now
+
+  返回当前时间的数字呈现。
+
+  ```js
+  // jQuery
+  $.now();
+
+  // Native
+  Date.now();
+  ```
+
+  + proxy
+
+  传入函数并返回一个新函数，该函数绑定指定上下文。
+
+  ```js
+  // jQuery
+  $.proxy(fn, context);
+
+  // Native
+  fn.bind(context);
+  ```
+
+  + makeArray
+
+  类数组对象转化为真正的 JavaScript 数组。
+
+  ```js
+  // jQuery
+  $.makeArray(arrayLike);
+
+  // Native
+  Array.prototype.slice.call(arrayLike);
+
+  // ES6-way
+  Array.from(arrayLike);
+  ```
+
+- [6.2](#6.2) <a name='6.2'></a> 包含
+
+  检测 DOM 元素是不是其他 DOM 元素的后代.
 
   ```js
   // jQuery
@@ -640,6 +1016,63 @@
 
   // Native
   el !== child && el.contains(child);
+  ```
+
+- [6.3](#6.3) <a name='6.3'></a> Globaleval
+
+  全局执行 JavaScript 代码。
+
+  ```js
+  // jQuery
+  $.globaleval(code);
+
+  // Native
+  function Globaleval(code) {
+    const script = document.createElement('script');
+    script.text = code;
+
+    document.head.appendChild(script).parentNode.removeChild(script);
+  }
+
+  // Use eval, but context of eval is current, context of $.Globaleval is global.
+  eval(code);
+  ```
+
+- [6.4](#6.4) <a name='6.4'></a> 解析
+
+  + parseHTML
+
+  解析字符串为 DOM 节点数组.
+
+  ```js
+  // jQuery
+  $.parseHTML(htmlString);
+
+  // Native
+  function parseHTML(string) {
+    const context = document.implementation.createHTMLDocument();
+
+    // Set the base href for the created document so any parsed elements with URLs
+    // are based on the document's URL
+    const base = context.createElement('base');
+    base.href = document.location.href;
+    context.head.appendChild(base);
+
+    context.body.innerHTML = string;
+    return context.body.children;
+  }
+  ```
+
+  + parseJSON
+
+  传入格式正确的 JSON 字符串并返回 JavaScript 值.
+
+  ```js
+  // jQuery
+  $.parseJSON(str);
+
+  // Native
+  JSON.parse(str);
   ```
 
 **[⬆ 回到顶部](#目录)**
